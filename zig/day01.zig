@@ -22,11 +22,10 @@ pub fn main() !void {
     std.debug.print("Part 1: {}\n", .{max});
 
     var top_three: u32 = 0;
-    var elf_slice = try elf_list.toOwnedSlice();
-    std.sort.sort(u32, elf_slice, {}, std.sort.desc(u32));
+    std.sort.sort(u32, elf_list.items, {}, std.sort.desc(u32));
     var i: u8 = 0;
     while (i < 3) {
-        top_three += elf_slice[i];
+        top_three += elf_list.items[i];
         i += 1;
     }
     std.debug.print("Part 2: {}\n", .{top_three});
