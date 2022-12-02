@@ -6,7 +6,9 @@ pub fn main() !void {
     var max: u32 = 0;
     var elf_iter = std.mem.split(u8, input, "\n\n");
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
     var elf_list = std.ArrayList(u32).init(gpa.allocator());
+    defer elf_list.deinit();
     while (elf_iter.next()) |elf| {
         const trimmed = std.mem.trim(u8, elf, "\n");
         var calories_iter = std.mem.split(u8, trimmed, "\n");
