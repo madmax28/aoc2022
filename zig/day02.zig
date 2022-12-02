@@ -1,5 +1,4 @@
 const std = @import("std");
-
 const Error = error{InvalidInput};
 
 const Result = enum {
@@ -39,7 +38,7 @@ const Move = enum {
     }
 
     fn play(self: Move, other: Move) Result {
-        return switch (self) {
+        switch (self) {
             .Rock => return switch (other) {
                 .Rock => .Draw,
                 .Paper => .Lose,
@@ -55,7 +54,7 @@ const Move = enum {
                 .Paper => .Win,
                 .Scissors => .Draw,
             },
-        };
+        }
     }
 
     fn from_u8(char: u8) !Move {
