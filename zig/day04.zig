@@ -26,24 +26,13 @@ const Pair = struct {
     }
 
     fn contained(pair: Pair) bool {
-        return pair.first.from <= pair.second.from and pair.first.to >= pair.second.to
-            or pair.second.from <= pair.first.from and pair.second.to >= pair.first.to;
+        return pair.first.from <= pair.second.from and pair.first.to >= pair.second.to or pair.second.from <= pair.first.from and pair.second.to >= pair.first.to;
     }
 
     fn overlap(pair: Pair) bool {
         return pair.first.to >= pair.second.from and pair.first.from <= pair.second.to;
     }
 };
-
-fn count(pairs: []Pair, check: fn (*Pair) bool) i32 {
-    var res = 0;
-    for (pairs) |pair| {
-        if (check(pair)) {
-            res += 1;
-        }
-    }
-    return res;
-}
 
 pub fn main() !void {
     const input = @embedFile("input/day04");
