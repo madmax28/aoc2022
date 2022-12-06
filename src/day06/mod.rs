@@ -6,7 +6,7 @@ enum Error {
 }
 
 pub fn part1(input: &str) -> crate::Result<usize> {
-    for idx in 0..input.len() - 4 {
+    for idx in 0..=input.len() - 4 {
         let set: HashSet<char> = input[idx..idx + 4].chars().collect();
         if set.len() == 4 {
             return Ok(idx + 4);
@@ -16,7 +16,7 @@ pub fn part1(input: &str) -> crate::Result<usize> {
 }
 
 pub fn part2(input: &str) -> crate::Result<usize> {
-    for idx in 0..input.len() - 14 {
+    for idx in 0..=input.len() - 14 {
         let set: HashSet<char> = input[idx..idx + 14].chars().collect();
         if set.len() == 14 {
             return Ok(idx + 14);

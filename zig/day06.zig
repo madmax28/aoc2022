@@ -11,7 +11,7 @@ pub fn main() !void {
     defer _ = gpa.deinit();
 
     var idx: usize = 0;
-    while (idx < trimmed.len - 4) : (idx += 1) {
+    while (idx <= trimmed.len - 4) : (idx += 1) {
         var set = std.AutoHashMap(u8, bool).init(alloc);
         defer set.deinit();
         var needle: usize = 0;
@@ -25,7 +25,7 @@ pub fn main() !void {
     }
 
     idx = 0;
-    while (idx < trimmed.len - 14) : (idx += 1) {
+    while (idx <= trimmed.len - 14) : (idx += 1) {
         var set = std.AutoHashMap(u8, bool).init(alloc);
         defer set.deinit();
         var needle: usize = 0;
