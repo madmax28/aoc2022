@@ -180,13 +180,13 @@ mod tests {
     #[test]
     fn day06p1() {
         let inp = include_str!("../input/day06");
-        assert_eq!(crate::day06::part1(inp.trim()).unwrap(), "GFTNRBZPF");
+        assert_eq!(crate::day06::part1(inp.trim()).unwrap(), 1542);
     }
 
     #[test]
     fn day06p2() {
         let inp = include_str!("../input/day06");
-        assert_eq!(crate::day06::part2(inp.trim()).unwrap(), "VRQWPDSGP");
+        assert_eq!(crate::day06::part2(inp.trim()).unwrap(), 3153);
     }
 }
 
