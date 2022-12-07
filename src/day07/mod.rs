@@ -16,13 +16,13 @@ impl Entry {
 }
 
 #[derive(Debug)]
-struct Fs {
+struct Fs<'a> {
     entries: Vec<Entry>,
-    lookup: HashMap<Vec<String>, usize>,
+    lookup: HashMap<Vec<&'a str>, usize>,
 }
 
-impl Fs {
-    fn add_with<F>(&mut self, path: &Vec<String>, add: F)
+impl<'a> Fs<'a> {
+    fn add_with<F>(&mut self, path: &Vec<&'a str>, add: F)
     where
         F: Fn() -> Entry,
     {
@@ -36,21 +36,21 @@ impl Fs {
         }
     }
 
-    fn from_shell_output(output: &str) -> crate::Result<Self> {
+    fn from_shell_output(output: &'a str) -> crate::Result<Self> {
         let mut fs = Fs {
             entries: vec![Entry::Dir(Vec::new())],
             lookup: HashMap::new(),
         };
-        fs.lookup.insert(vec!["/".to_string()], 0);
+        fs.lookup.insert(vec!["/"], 0);
 
-        let mut path = vec!["/".to_string()];
+        let mut path = vec!["/"];
         for line in output.lines() {
             match &line[..4] {
                 "$ cd" => match &line[5..] {
                     "/" => _ = path.split_off(1),
                     ".." => _ = path.pop(),
                     dir => {
-                        path.push(dir.to_string());
+                        path.push(dir);
                         fs.add_with(&path, || Entry::Dir(Vec::new()));
                     }
                 },
@@ -58,15 +58,17 @@ impl Fs {
                 "dir " => (),
                 // file
                 _ => {
-                    let mut chars = line.chars();
-                    let size = chars
-                        .by_ref()
+                    let size = line
+                        .chars()
                         .take_while(char::is_ascii_digit)
                         .collect::<String>()
                         .parse::<i32>()?;
-                    let file = chars.collect();
+                    let start = line
+                        .chars()
+                        .take_while(|c| !c.is_ascii_alphabetic())
+                        .count();
 
-                    path.push(file);
+                    path.push(&line[start..]);
                     fs.add_with(&path, || Entry::File(size));
                     path.pop();
                 }
@@ -155,7 +157,7 @@ $ ls
 7214296 k";
 
         let fs = Fs::from_shell_output(input).unwrap();
-        let path = vec!["/".to_string(), "a".to_string(), "e".to_string()];
+        let path = vec!["/", "a", "e"];
         let node = fs.lookup[&path];
         let (size_e, p1_e) = fs.p1(node);
         assert_eq!(584, size_e);
