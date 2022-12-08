@@ -21,45 +21,25 @@ const DIRECTIONS: &[Direction] = &[
 ];
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
-struct Point(usize, usize);
+struct Point(i32, i32);
 
 impl Point {
     fn neighbors(&self, dir: Direction) -> impl Iterator<Item = Point> {
-        let mut start = *self;
+        let mut needle = *self;
         iter::from_fn(move || {
             match dir {
-                Direction::Right => start.0 += 1,
-                Direction::Left => {
-                    if start.0 == 0 {
-                        return None;
-                    }
-                    start.0 -= 1;
-                }
-                Direction::Down => start.1 += 1,
-                Direction::Up => {
-                    if start.1 == 0 {
-                        return None;
-                    }
-                    start.1 -= 1;
-                }
+                Direction::Right => needle.0 += 1,
+                Direction::Left => needle.0 -= 1,
+                Direction::Down => needle.1 += 1,
+                Direction::Up => needle.1 -= 1,
             }
-            Some(start)
+            Some(needle)
         })
     }
 }
 
 struct Map {
     trees: HashMap<Point, u32>,
-    width: usize,
-    height: usize,
-}
-
-impl Map {
-    fn coords(&self) -> impl Iterator<Item = Point> + '_ {
-        (0..self.height)
-            .flat_map(|y| iter::repeat(y).zip(0..self.width))
-            .map(|p| Point(p.0, p.1))
-    }
 }
 
 impl FromStr for Map {
@@ -67,31 +47,25 @@ impl FromStr for Map {
 
     fn from_str(s: &str) -> crate::Result<Self> {
         let mut trees = HashMap::new();
-        let (mut xmax, mut ymax) = (0, 0);
         for (y, xs) in s.lines().enumerate() {
             for (x, c) in xs.chars().enumerate() {
                 trees.insert(
-                    Point(x, y),
+                    Point(x as i32, y as i32),
                     c.to_digit(10)
                         .ok_or_else(|| crate::Error::boxed(Error::InvalidInput))?,
                 );
-                xmax = x;
             }
-            ymax = y;
         }
 
-        Ok(Map {
-            trees,
-            width: xmax + 1,
-            height: ymax + 1,
-        })
+        Ok(Map { trees })
     }
 }
 
 pub fn part1(input: &str) -> crate::Result<usize> {
     let map: Map = input.parse()?;
     let num_visible = map
-        .coords()
+        .trees
+        .keys()
         .map(|pos| {
             DIRECTIONS
                 .iter()
@@ -100,7 +74,7 @@ pub fn part1(input: &str) -> crate::Result<usize> {
                         .map(|pos| map.trees.get(&pos))
                         .take_while(Option::is_some)
                         .map(Option::unwrap)
-                        .all(|other| other < &map.trees[&pos])
+                        .all(|other| other < &map.trees[pos])
                 })
                 .any(|visible| visible)
         })
@@ -112,7 +86,8 @@ pub fn part1(input: &str) -> crate::Result<usize> {
 pub fn part2(input: &str) -> crate::Result<i32> {
     let map: Map = input.parse()?;
     let score = map
-        .coords()
+        .trees
+        .keys()
         .map(|pos| {
             DIRECTIONS
                 .iter()
@@ -125,7 +100,7 @@ pub fn part2(input: &str) -> crate::Result<i32> {
                         .map(Option::unwrap)
                     {
                         score += 1;
-                        if other >= &map.trees[&pos] {
+                        if other >= &map.trees[pos] {
                             break;
                         }
                     }
