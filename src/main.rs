@@ -7,6 +7,7 @@ mod day06;
 mod day07;
 mod day08;
 mod day09;
+mod day10;
 
 use std::{env, error, fmt, fs, result, time};
 
@@ -124,6 +125,10 @@ fn main() -> Result<()> {
             println!("Part 1: {}", time(day09::part1, input.trim())?);
             println!("Part 2: {}", time(day09::part2, input.trim())?);
         }
+        10 => {
+            println!("Part 1: {}", time(day10::part1, input.trim())?);
+            println!("Part 2: \n{}", time(day10::part2, input.trim())?);
+        }
         _ => unimplemented!(),
     }
 
@@ -238,6 +243,25 @@ mod tests {
     fn day09p2() {
         let inp = include_str!("../input/day09");
         assert_eq!(crate::day09::part2(inp.trim()).unwrap(), 2443);
+    }
+
+    #[test]
+    fn day10p1() {
+        let inp = include_str!("../input/day10");
+        assert_eq!(crate::day10::part1(inp.trim()).unwrap(), 13680);
+    }
+
+    #[test]
+    fn day10p2() {
+        let inp = include_str!("../input/day10");
+        let mut exp = String::new();
+        exp.push_str("###..####..##..###..#..#.###..####.###..\n");
+        exp.push_str("#..#....#.#..#.#..#.#.#..#..#.#....#..#.\n");
+        exp.push_str("#..#...#..#....#..#.##...#..#.###..###..\n");
+        exp.push_str("###...#...#.##.###..#.#..###..#....#..#.\n");
+        exp.push_str("#....#....#..#.#....#.#..#....#....#..#.\n");
+        exp.push_str("#....####..###.#....#..#.#....####.###..\n");
+        assert_eq!(crate::day10::part2(inp.trim()).unwrap(), exp);
     }
 }
 
