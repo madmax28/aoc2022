@@ -1,5 +1,5 @@
 use std::{
-    cmp::Reverse,
+    cmp::{max, Reverse},
     collections::{BinaryHeap, HashMap, HashSet},
 };
 
@@ -27,7 +27,7 @@ impl Point {
 
 fn a_star(start: Point, goal: Point, map: &HashMap<Point, i32>) -> Option<i32> {
     let mut frontier = BinaryHeap::new();
-    let heuristic = start.dist(goal) + (Z - A);
+    let heuristic = max(start.dist(goal), Z - A);
     frontier.push(Reverse((heuristic, 0, start)));
     let mut visited = HashSet::new();
 
@@ -35,10 +35,6 @@ fn a_star(start: Point, goal: Point, map: &HashMap<Point, i32>) -> Option<i32> {
         visited.insert(p);
 
         for np in p.neighbors() {
-            if np == goal {
-                return Some(cost + 1);
-            }
-
             if frontier.iter().any(|Reverse((_, _, p))| *p == np) {
                 continue;
             }
@@ -52,8 +48,13 @@ fn a_star(start: Point, goal: Point, map: &HashMap<Point, i32>) -> Option<i32> {
                     continue;
                 }
 
-                let heuristic = np.dist(goal) + Z - *height;
-                frontier.push(Reverse((heuristic, cost + 1, np)));
+                if np == goal {
+                    return Some(cost + 1);
+                }
+
+                let cost = 1 + cost;
+                let heuristic = cost + max(np.dist(goal), Z - *height);
+                frontier.push(Reverse((heuristic, cost, np)));
             }
         }
     }
@@ -94,4 +95,21 @@ pub fn part2(input: &str) -> crate::Result<i32> {
         .min()
         .unwrap();
     Ok(min)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ex1() {
+        let input = "Sabqponm
+abcryxxl
+accszExk
+acctuvwj
+abdefghi";
+
+        assert_eq!(part1(input).unwrap(), 31);
+        assert_eq!(part2(input).unwrap(), 29);
+    }
 }
