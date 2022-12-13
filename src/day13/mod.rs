@@ -1,5 +1,4 @@
 use std::cmp::Ordering;
-use std::iter::Peekable;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 enum Entry {
@@ -11,11 +10,9 @@ enum Entry {
 struct Value(i32);
 
 impl Value {
-    fn parse<I: Iterator<Item = char>>(it: &mut Peekable<I>) -> Self {
-        let mut s = String::new();
-        while it.peek().unwrap().is_ascii_digit() {
-            s.push(it.next().unwrap());
-        }
+    fn parse(s: &str, idx: &mut usize) -> Self {
+        let s: String = s[*idx..].chars().take_while(char::is_ascii_digit).collect();
+        *idx += s.len();
         Value(s.parse().unwrap())
     }
 }
@@ -24,18 +21,18 @@ impl Value {
 struct List(Vec<Entry>);
 
 impl List {
-    fn parse<I: Iterator<Item = char>>(it: &mut Peekable<I>) -> Self {
-        it.next().unwrap(); // skip [
+    fn parse(s: &str, idx: &mut usize) -> Self {
+        *idx += 1; // skip [
         let mut list = Vec::new();
         loop {
-            match *it.peek().unwrap() {
-                '[' => list.push(Entry::List(List::parse(it))),
-                c if c.is_ascii_digit() => list.push(Entry::Value(Value::parse(it))),
+            match s[*idx..].chars().next().unwrap() {
+                '[' => list.push(Entry::List(List::parse(s, idx))),
+                c if c.is_ascii_digit() => list.push(Entry::Value(Value::parse(s, idx))),
                 ']' => {
-                    it.next();
+                    *idx += 1;
                     return List(list);
                 }
-                _ => _ = it.next(),
+                _ => *idx += 1,
             }
         }
     }
@@ -90,7 +87,7 @@ pub fn part1(input: &str) -> crate::Result<usize> {
         .filter_map(|(idx, pair)| {
             let lists: Vec<List> = pair
                 .split('\n')
-                .map(|s| List::parse(&mut s.chars().peekable()))
+                .map(|s| List::parse(s, &mut 0))
                 .collect();
             if lists[0] <= lists[1] {
                 Some(1 + idx)
@@ -107,13 +104,13 @@ pub fn part2(input: &str) -> crate::Result<usize> {
         .split("\n\n")
         .flat_map(|pair| {
             pair.split('\n')
-                .map(|s| List::parse(&mut s.chars().peekable()))
+                .map(|s| List::parse(s, &mut 0))
         })
         .collect();
 
-    let div1 = List::parse(&mut "[[2]]".chars().peekable());
+    let div1 = List::parse("[[2]]", &mut 0);
     lists.push(div1.clone());
-    let div2 = List::parse(&mut "[[6]]".chars().peekable());
+    let div2 = List::parse("[[6]]", &mut 0);
     lists.push(div2.clone());
 
     lists.sort();
