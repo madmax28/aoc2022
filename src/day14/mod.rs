@@ -53,22 +53,20 @@ pub fn part1(input: &str) -> crate::Result<usize> {
     let mut map = parse(input)?;
     let ymax = map.keys().map(|p| p.1).max().expect("map empty");
     let mut cnt = 0;
-    loop {
+    'outer: loop {
         let mut p = Point(500, 0);
         while p.1 <= ymax {
             if let Some(pp) = p.below().find(|p| !map.contains_key(p)) {
-                if pp.1 > ymax {
-                    return Ok(cnt);
-                }
-
                 p = pp;
                 continue;
             }
 
             map.insert(p, 'o');
             cnt += 1;
-            break;
+            continue 'outer;
         }
+
+        return Ok(cnt);
     }
 }
 
