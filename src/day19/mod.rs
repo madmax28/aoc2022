@@ -1,7 +1,4 @@
-use std::{
-    cmp::{max, Ordering},
-    collections::{HashMap, VecDeque},
-};
+use std::{cmp::max, collections::HashMap};
 
 type Cost = [i32; 3];
 type Blueprint = [Cost; 4];
