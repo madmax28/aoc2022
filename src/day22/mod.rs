@@ -69,11 +69,9 @@ struct Map {
 
 impl Map {
     fn get(&self, pos: &(i32, i32)) -> Option<char> {
-        if pos.0 >= 0 && pos.1 >= 0 && pos.1 < self.height && pos.0 < self.width {
-            Some(self.map[pos.1 as usize][pos.0 as usize])
-        } else {
-            None
-        }
+        self.map
+            .get(pos.1 as usize)
+            .and_then(|xs| xs.get(pos.0 as usize).copied())
     }
 
     fn mv(&mut self, n: i32) {
@@ -104,93 +102,99 @@ impl Map {
                 match self.get(&cand.pos) {
                     Some('.') => break,
                     Some('#') => break 'outer,
-                    _ => match self.pos {
-                        Pos { pos: (x, y), facing: Facing::Left } if x < 50 && y < 150 => {
-                            cand = Pos {
-                                pos: (50, 49 - (y - 100)),
-                                facing: Facing::Right,
+                    _ => {
+                        let Pos {
+                            pos: (x, y),
+                            facing,
+                        } = self.pos;
+                        match (x, y, facing) {
+                            (x, y, Facing::Left) if x < 50 && y < 150 => {
+                                cand = Pos {
+                                    pos: (50, 49 - (y - 100)),
+                                    facing: Facing::Right,
+                                }
                             }
-                        }
-                        Pos { pos: (x, y), facing: Facing::Up } if x < 50 && y < 150 => {
-                            cand = Pos {
-                                pos: (50, 50 + x),
-                                facing: Facing::Right,
+                            (x, y, Facing::Up) if x < 50 && y < 150 => {
+                                cand = Pos {
+                                    pos: (50, 50 + x),
+                                    facing: Facing::Right,
+                                }
                             }
-                        }
-                        Pos { pos: (x, y), facing: Facing::Right } if x < 50 => {
-                            cand = Pos {
-                                pos: (50 + y - 150, 149),
-                                facing: Facing::Up,
+                            (x, y, Facing::Right) if x < 50 => {
+                                cand = Pos {
+                                    pos: (50 + y - 150, 149),
+                                    facing: Facing::Up,
+                                }
                             }
-                        }
-                        Pos { pos: (x, _y), facing: Facing::Down } if x < 50 => {
-                            cand = Pos {
-                                pos: (100 + x, 0),
-                                facing: Facing::Down,
+                            (x, _, Facing::Down) if x < 50 => {
+                                cand = Pos {
+                                    pos: (100 + x, 0),
+                                    facing: Facing::Down,
+                                }
                             }
-                        }
-                        Pos { pos: (x, y), facing: Facing::Left } if x < 50 => {
-                            cand = Pos {
-                                pos: (50 + y - 150, 0),
-                                facing: Facing::Down,
+                            (x, y, Facing::Left) if x < 50 => {
+                                cand = Pos {
+                                    pos: (50 + y - 150, 0),
+                                    facing: Facing::Down,
+                                }
                             }
-                        }
-                        Pos { pos: (x, y), facing: Facing::Left } if x < 100 && y < 50 => {
-                            cand = Pos {
-                                pos: (0, 149 - y),
-                                facing: Facing::Right,
+                            (x, y, Facing::Left) if x < 100 && y < 50 => {
+                                cand = Pos {
+                                    pos: (0, 149 - y),
+                                    facing: Facing::Right,
+                                }
                             }
-                        }
-                        Pos { pos: (x, y), facing: Facing::Up } if x < 100 && y < 50 => {
-                            cand = Pos {
-                                pos: (0, 150 + x - 50),
-                                facing: Facing::Right,
+                            (x, y, Facing::Up) if x < 100 && y < 50 => {
+                                cand = Pos {
+                                    pos: (0, 150 + x - 50),
+                                    facing: Facing::Right,
+                                }
                             }
-                        }
-                        Pos { pos: (x, y), facing: Facing::Right } if x < 100 && y < 100 => {
-                            cand = Pos {
-                                pos: (100 + y - 50, 49),
-                                facing: Facing::Up,
+                            (x, y, Facing::Right) if x < 100 && y < 100 => {
+                                cand = Pos {
+                                    pos: (100 + y - 50, 49),
+                                    facing: Facing::Up,
+                                }
                             }
-                        }
-                        Pos { pos: (x, y), facing: Facing::Left } if x < 100 && y < 100 => {
-                            cand = Pos {
-                                pos: (y - 50, 100),
-                                facing: Facing::Down,
+                            (x, y, Facing::Left) if x < 100 && y < 100 => {
+                                cand = Pos {
+                                    pos: (y - 50, 100),
+                                    facing: Facing::Down,
+                                }
                             }
-                        }
-                        Pos { pos: (x, y), facing: Facing::Right } if x < 100 => {
-                            cand = Pos {
-                                pos: (149, 49 - (y - 100)),
-                                facing: Facing::Left,
+                            (x, y, Facing::Right) if x < 100 => {
+                                cand = Pos {
+                                    pos: (149, 49 - (y - 100)),
+                                    facing: Facing::Left,
+                                }
                             }
-                        }
-                        Pos { pos: (x, _y), facing: Facing::Down } if x < 100 => {
-                            cand = Pos {
-                                pos: (49, 150 + x - 50),
-                                facing: Facing::Left,
+                            (x, _, Facing::Down) if x < 100 => {
+                                cand = Pos {
+                                    pos: (49, 150 + x - 50),
+                                    facing: Facing::Left,
+                                }
                             }
-                        }
-                        Pos { pos: (_x, y), facing: Facing::Right } => {
-                            cand = Pos {
-                                pos: (99, 149 - y),
-                                facing: Facing::Left,
+                            (_, y, Facing::Right) => {
+                                cand = Pos {
+                                    pos: (99, 149 - y),
+                                    facing: Facing::Left,
+                                }
                             }
-                        }
-                        Pos { pos: (x, _y), facing: Facing::Down } => {
-                            cand = Pos {
-                                pos: (99, 50 + x - 100),
-                                facing: Facing::Left,
+                            (x, _, Facing::Down) => {
+                                cand = Pos {
+                                    pos: (99, 50 + x - 100),
+                                    facing: Facing::Left,
+                                }
                             }
-                        }
-                        Pos { pos: (x, _y), facing: Facing::Up } => {
-                            cand = Pos {
-                                pos: (x - 100, 199),
-                                facing: Facing::Up,
+                            (x, _, Facing::Up) => {
+                                cand = Pos {
+                                    pos: (x - 100, 199),
+                                    facing: Facing::Up,
+                                }
                             }
+                            _ => panic!("invalid pos"),
                         }
-                        _ => panic!("invalid pos"),
-                    },
+                    }
                 }
             }
             self.pos = cand;
@@ -215,7 +219,8 @@ impl FromStr for Map {
         let mut map: Vec<Vec<char>> = s.lines().map(|line| line.chars().collect()).collect();
         let height = map.len() as i32;
         let width = map[0].len() as i32;
-        map.iter_mut().for_each(|row| row.resize(width as usize, ' '));
+        map.iter_mut()
+            .for_each(|row| row.resize(width as usize, ' '));
 
         let x = (0..).find(|x| map[0][*x] == '.').unwrap();
 
